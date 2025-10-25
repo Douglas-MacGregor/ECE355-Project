@@ -31,7 +31,6 @@ void EXTI2_3_IRQHandler()
         if (timerTriggered == 0) // first edge detected
         {
             TIM2->CNT = 0;            // reset counter
-            overFlow = 0;             // reset overflow count
             TIM2->CR1 |= TIM_CR1_CEN; // start timer
             timerTriggered = 1;       // mark timer running
         }
@@ -39,7 +38,7 @@ void EXTI2_3_IRQHandler()
         {
             TIM2->CR1 &= ~(TIM_CR1_CEN); // stop timer
             // Calculate and print period and frequency in seconds, microseconds, and hertz
-            uint64_t cycles = TIM2->CNT + ((uint64_t)overFlow * (uint64_t)(myTIM2_PERIOD));
+            uint64_t cycles = TIM2->CNT + ((uint64_t)(myTIM2_PERIOD));
             // Convert to microseconds
             uint32_t period_us = (uint32_t)((cycles * 1000000ULL) / SystemCoreClock); // µs
             uint32_t freq_hz = (cycles ? (uint32_t)((SystemCoreClock + (cycles / 2)) / cycles) : 0);

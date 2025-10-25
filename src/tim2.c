@@ -43,6 +43,5 @@ void TIM2_IRQHandler()
         /* Restart stopped timer */
         TIM2->CNT = 0;            // reset counter
         TIM2->CR1 |= TIM_CR1_CEN; // start timer
-        overFlow++;
     }
 }
