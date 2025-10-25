@@ -12,7 +12,7 @@ void myADC_Init(void)
     /* Configure ADC1: 12-bit resolution, right data alignment, single conversion mode */
     ADC1->CFGR1 |= (0b11 << 12);
     ADC1->CFGR1 &= ~(0b111000);
-    ADC1->CHSELR |= 0b1;
+    ADC1->CHSELR |= 0b10;
     ADC1->SMPR |= 0b111;
     ADC1->CR |= 0b1;
     while ((ADC1->ISR & 0b1) == 0)

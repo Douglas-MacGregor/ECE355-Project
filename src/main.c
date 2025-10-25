@@ -59,9 +59,9 @@ void myGPIOB_Init()
 
 void myGPIOA_Init()
 {
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;	  /* Enable clock for GPIOA peripheral */
-	GPIOA->MODER |= 0b1100;				  /* Configure PA1 as analog input */
-	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1); /* Ensure no pull-up/pull-down for PA1 */
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; /* Enable clock for GPIOA peripheral */
+	GPIOA->MODER |= 0b1100;			   /* Configure PA1 as analog input */
+									   // GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1); /* Ensure no pull-up/pull-down for PA1 */
 }
 
 #pragma GCC diagnostic pop
