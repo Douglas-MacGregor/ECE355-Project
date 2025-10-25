@@ -21,8 +21,8 @@ void myADC_Init(void)
 
 void myADC_StartConversion(void)
 {
-    ADC1->CR |= ADC_CR_ADSTART;
-    while ((ADC1->ISR & ADC_ISR_EOC) == 0)
+    ADC1->CR |= 0b100;
+    while ((ADC1->ISR & 0b100) == 0)
         ;
     resistance = ADC1->DR;
 }
