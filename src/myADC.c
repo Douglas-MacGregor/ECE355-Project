@@ -1,4 +1,4 @@
-#include "adc.h"
+#include "myADC.h"
 #include "globals.h"
 #include <stdio.h>
 #include "diag/Trace.h"

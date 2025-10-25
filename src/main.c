@@ -2,10 +2,10 @@
 #include "diag/Trace.h"
 #include "cmsis/cmsis_device.h"
 #include "myEXTI.h"
-#include "tim2.h"
+#include "myTIM2.h"
 #include "globals.h"
 #include "misc.h"
-#include "adc.h"
+#include "myADC.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
