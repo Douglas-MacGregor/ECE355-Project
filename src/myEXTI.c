@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "diag/Trace.h"
 #include "cmsis/cmsis_device.h"
+#include "myEXTI.h"
+#include "globals.h"
 
 void myEXTI_Init()
 {

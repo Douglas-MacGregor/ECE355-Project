@@ -17,6 +17,7 @@
 #include "cmsis/cmsis_device.h"
 #include "myEXTI.h"
 #include "tim2.h"
+#include "globals.h"
 
 // ----------------------------------------------------------------------------
 //
@@ -54,9 +55,9 @@ void myEXTI_Init(void);
 // NOTE: You'll need at least one global variable
 // (say, timerTriggered = 0 or 1) to indicate
 // whether TIM2 has started counting or not.
-volatile int timerTriggered = 0;
-volatile int period = 0;
-volatile int overFlow = 0;
+timerTriggered = 0;
+period = 0;
+overFlow = 0;
 
 /*** Call this function to boost the STM32F0xx clock to 48 MHz ***/
 

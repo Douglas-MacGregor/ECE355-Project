@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "diag/Trace.h"
 #include "cmsis/cmsis_device.h"
+#include "tim2.h"
+#include "globals.h"
 
 void myTIM2_Init()
 {
