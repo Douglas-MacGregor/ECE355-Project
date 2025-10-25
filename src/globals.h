@@ -6,4 +6,4 @@
 
 extern volatile int timerTriggered;
 extern volatile int frequency;
-extern volatile int resistance;
+extern volatile unsigned int resistance;
