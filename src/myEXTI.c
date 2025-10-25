@@ -38,7 +38,7 @@ void EXTI2_3_IRQHandler()
         {
             TIM2->CR1 &= ~(TIM_CR1_CEN); // stop timer
             // Calculate and print period and frequency in seconds, microseconds, and hertz
-            uint64_t cycles = TIM2->CNT + ((uint64_t)(myTIM2_PERIOD));
+            uint64_t cycles = TIM2->CNT;
             // Convert to microseconds
             uint32_t period_us = (uint32_t)((cycles * 1000000ULL) / SystemCoreClock); // µs
             uint32_t freq_hz = (cycles ? (uint32_t)((SystemCoreClock + (cycles / 2)) / cycles) : 0);
