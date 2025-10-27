@@ -7,3 +7,4 @@
 extern volatile int timerTriggered;
 extern volatile int frequency;
 extern volatile unsigned int resistance;
+extern volatile int fivefivefivefive;

@@ -18,6 +18,7 @@ void myGPIOA_Init(void);
 volatile int timerTriggered = 0;
 volatile int frequency = 0;
 volatile unsigned int resistance = 0;
+volatile int fivefivefivefive = 0;
 
 int main(int argc, char *argv[])
 {
@@ -54,14 +55,25 @@ void myGPIOB_Init()
 	GPIOB->MODER &= ~(GPIO_MODER_MODER2);
 	/* Ensure no pull-up/pull-down for PB2 */
 	// Relevant register: GPIOB->PUPDR
-	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR0);
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR2);
+
+	GPIOB->MODER &= ~(GPIO_MODER_MODER3); // Configure PB3 as input
+
+	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR3);
 }
 
 void myGPIOA_Init()
 {
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN;	  /* Enable clock for GPIOA peripheral */
-	GPIOA->MODER |= 0b1100;				  /* Configure PA1 as analog input */
-	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1); /* Ensure no pull-up/pull-down for PA1 */
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; /* Enable clock for GPIOA peripheral */
+
+	GPIOA->MODER |= 0b01;				  /* Configure PA0 as input */
+	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR0); /* Ensure no pull-up/pull-down for PA0 */
+
+	GPIOA->MODER |= 0b1100; /* Configure PA1 as analog input */
+	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1);
+
+	GPIOA->MODER |= 0b1100000000;		  // Configure PA3 as analog input
+	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR4); /* Ensure no pull-up/pull-down for PA4 */
 }
 
 #pragma GCC diagnostic pop

@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "cmsis_device.h": "c",
+    "globals.h": "c"
+  }
+}
