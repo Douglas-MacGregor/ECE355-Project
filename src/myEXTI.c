@@ -86,6 +86,7 @@ void EXTI0_1_IRQHandler()
     {
         if (GPIOA->IDR & GPIO_IDR_0) // confirm PA0 is high
         {
+            trace_printf("Switching Freq source \n");
             if (fivefivefivefive == 0)
             {
                 fivefivefivefive = 1;
