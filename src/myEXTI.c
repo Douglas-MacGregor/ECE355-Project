@@ -84,7 +84,7 @@ void EXTI0_1_IRQHandler()
 {
     if ((EXTI->PR & EXTI_PR_PR0) != 0) // rising edge on PA0
     {
-        if (GPIOA->IDR & GPIO_IDR_ID0) // confirm PA0 is high
+        if (GPIOA->IDR & GPIO_IDR_0) // confirm PA0 is high
         {
             if (fivefivefivefive == 0)
             {
