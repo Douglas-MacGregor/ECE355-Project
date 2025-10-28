@@ -16,7 +16,7 @@ void myDAC_Init(void)
     DAC->CR |= 0b001;
 }
 
-void myDAC_SetValue(unsigned.int value)
+void myDAC_SetValue(unsigned int value)
 {
     /* Set the 12-bit right-aligned data for DAC channel 1 */
     // Relevant register: DAC->DHR12R1
