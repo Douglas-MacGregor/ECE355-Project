@@ -10,9 +10,9 @@ void myDAC_Init(void)
     /* Enable clock for DAC peripheral */
     // Relevant register: RCC->APB1ENR
     RCC->APB1ENR |= RCC_APB1ENR_DACEN;
-    /* Configure DAC: enable output buffer */
-    // Relevant register: DAC->CR
-    DAC->CR |= DAC_CR_BOFF1;
+    /* Configure DAC: output buffer enabled by default */
+    // Relevant register: DAC->CR (BOFF1 = 0 means buffer enabled)
+    DAC->CR &= ~DAC_CR_BOFF1;  // Ensure output buffer is enabled
     /* Enable DAC channel 1 */
     // Relevant register: DAC->CR
     DAC->CR |= DAC_CR_EN1;
