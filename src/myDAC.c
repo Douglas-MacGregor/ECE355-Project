@@ -12,10 +12,8 @@ void myDAC_Init(void)
     RCC->APB1ENR |= RCC_APB1ENR_DACEN;
     /* Configure DAC: output buffer enabled by default */
     // Relevant register: DAC->CR (BOFF1 = 0 means buffer enabled)
-    DAC->CR &= ~DAC_CR_BOFF1;  // Ensure output buffer is enabled
-    /* Enable DAC channel 1 */
-    // Relevant register: DAC->CR
-    DAC->CR |= DAC_CR_EN1;
+    DAC->CR &= ~(0b111);
+    DAC->CR |= 0b001;
 }
 
 void myDAC_SetValue(uint16_t value)
