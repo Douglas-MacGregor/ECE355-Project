@@ -6,14 +6,14 @@
 #include "globals.h"
 #include "misc.h"
 #include "myADC.h"
+#include "myDAC.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
 
-void myGPIOB_Init(void);
-void myGPIOA_Init(void);
+void myGPIO_Init(void);
 
 volatile int timerTriggered = 0;
 volatile int frequency = 0;
@@ -30,50 +30,53 @@ int main(int argc, char *argv[])
 
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN; /* Enable SYSCFG clock */
 
-	myGPIOB_Init(); /* Initialize I/O port PB */
-	myGPIOA_Init(); /* Initialize I/O port PA */
-	// myTIM2_Init();	/* Initialize timer TIM2 */
-	// myEXTI_Init();	/* Initialize EXTI */
-	myADC_Init(); /* Initialize ADC */
+	myGPIO_Init(); /* Initialize GPIO */
+	myTIM2_Init(); /* Initialize timer TIM2 */
+	myEXTI_Init(); /* Initialize EXTI */
+	myADC_Init();  /* Initialize ADC */
+	myDAC_Init();  /* Initialize DAC */
 
 	while (1)
 	{
 		myADC_StartConversion();
 		trace_printf("Resistance ADC Value: %u\n", resistance);
+		myDAC_SetValue(resistance);
 	}
 
 	return 0;
 }
 
-void myGPIOB_Init()
+void myGPIO_Init(void)
 {
-	/* Enable clock for GPIOB peripheral */
-	// Relevant register: RCC->AHBENR
-	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
-	/* Configure PB2 as input */
-	// Relevant register: GPIOB->MODER
-	GPIOB->MODER &= ~(GPIO_MODER_MODER2);
-	/* Ensure no pull-up/pull-down for PB2 */
-	// Relevant register: GPIOB->PUPDR
-	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR2);
-
-	GPIOB->MODER &= ~(GPIO_MODER_MODER3); // Configure PB3 as input
-
-	GPIOB->PUPDR &= ~(GPIO_PUPDR_PUPDR3);
-}
-
-void myGPIOA_Init()
-{
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN; /* Enable clock for GPIOA peripheral */
-
-	GPIOA->MODER |= 0b01;				  /* Configure PA0 as input */
-	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR0); /* Ensure no pull-up/pull-down for PA0 */
-
-	GPIOA->MODER |= 0b1100; /* Configure PA1 as analog input */
-	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1);
-
-	GPIOA->MODER |= 0b1100000000;		  // Configure PA3 as analog input
-	GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR4); /* Ensure no pull-up/pull-down for PA4 */
+	// clock bit enable
+	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOBEN | RCC_AHBENR_GPIOCEN;
+	// PA modes
+	GPIOA->MODER &= ~(GPIO_MODER_MODER0); // PA0 user push button (input)
+	GPIOA->MODER |= (GPIO_MODER_MODER1);  // PA1 ADC input (analog)
+	GPIOA->MODER |= (GPIO_MODER_MODER4);  // PA4 DAC output (analog)
+	// PB modes
+	GPIOB->MODER &= ~(GPIO_MODER_MODER2); // PB2 function generator (input)
+	GPIOB->MODER &= ~(GPIO_MODER_MODER3); // PB3 555 timer (input)
+	GPIOB->MODER &= ~(3UL << (8 * 2));	  // PB8 CS#("Chip Select") (output)
+	GPIOB->MODER |= (1UL << (8 * 2));
+	GPIOB->MODER &= ~(3UL << (9 * 2)); // PB9 D/C#("Data/Command") (output)
+	GPIOB->MODER |= (1UL << (9 * 2));
+	GPIOB->MODER &= ~(3UL << (11 * 2)); // PB11 RES#("Reset") (output)
+	GPIOB->MODER |= (1UL << (11 * 2));
+	GPIOB->MODER &= ~(3UL << (13 * 2)); // PB13 SCLK("Serial Clock") output (AF)
+	GPIOB->MODER |= (2UL << (13 * 2));
+	GPIOB->MODER &= ~(3UL << (15 * 2)); // PB15 SDIN("Serial Data") output (AF)
+	GPIOB->MODER |= (2UL << (15 * 2));
+	// PC modes
+	GPIOC->MODER &= ~(3UL << (8 * 2)); // PC8 blue LED (output)
+	GPIOC->MODER |= (1UL << (8 * 2));
+	GPIOC->MODER &= ~(3UL << (9 * 2)); // PC9 green LED (output)
+	GPIOC->MODER |= (1UL << (9 * 2));
+	// alternate function setup
+	GPIOB->AFR[1] &= ~(0xF << (4 * (13 - 8))); // PB13 SPI_SCK
+	GPIOB->AFR[1] |= (0x0 << (4 * (13 - 8)));
+	GPIOB->AFR[1] &= ~(0xF << (4 * (15 - 8))); // SPI_MOSI
+	GPIOB->AFR[1] |= (0x0 << (4 * (15 - 8)));
 }
 
 #pragma GCC diagnostic pop
