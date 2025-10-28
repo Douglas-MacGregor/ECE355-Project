@@ -25,13 +25,14 @@ int main(int argc, char *argv[])
 {
 
 	SystemClock48MHz();
-
 	trace_printf("This is Part 2 of Introductory Lab...\n");
 	trace_printf("System clock: %u Hz\n", SystemCoreClock);
-
-	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN; /* Enable SYSCFG clock */
-
-	myGPIO_Init(); /* Initialize GPIO */
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGCOMPEN;
+	myGPIO_Init();
+	mySPI_Init();
+	myTIM3_Init();
+	oled_Config(); // sends init commands to OLED
+	trace_printf("OLED initialized.\n");
 	myTIM2_Init(); /* Initialize timer TIM2 */
 	myEXTI_Init(); /* Initialize EXTI */
 	myADC_Init();  /* Initialize ADC */
@@ -40,11 +41,10 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		myADC_StartConversion();
-		trace_printf("Resistance ADC Value: %u\n Ohm", resistance);
-		trace_printf("Frequence of wave forms Value: %u\n Hz", frequency);
+		trace_printf("Resistance ADC Value: %u\n", resistance);
+		refresh_OLED();
 		myDAC_SetValue(resistance);
 	}
-
 	return 0;
 }
 
