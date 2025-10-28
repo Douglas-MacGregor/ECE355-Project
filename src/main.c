@@ -7,6 +7,7 @@
 #include "misc.h"
 #include "myADC.h"
 #include "myDAC.h"
+#include "mySPI.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -39,7 +40,8 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		myADC_StartConversion();
-		trace_printf("Resistance ADC Value: %u\n", resistance);
+		trace_printf("Resistance ADC Value: %u\n Ohm", resistance);
+		trace_printf("Frequence of wave forms Value: %u\n Hz", frequency);
 		myDAC_SetValue(resistance);
 	}
 
