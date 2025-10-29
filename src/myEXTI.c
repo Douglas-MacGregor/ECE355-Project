@@ -6,27 +6,38 @@
 
 void myEXTI_Init()
 {
+    /* Map EXTI0 line to PA0 */
+    SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI0;   // Clear EXTI0 bits
+    SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI0_PA; // Map PA0 to EXTI0
+
     /* Map EXTI2 line to PB2 */
-    // Relevant register: SYSCFG->EXTICR[0]
-    SYSCFG->EXTICR[0] &= SYSCFG_EXTICR1_EXTI2;
-    SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI2_PB;
-    /* EXTI2 line interrupts: set rising-edge trigger */
-    // Relevant register: EXTI->RTSR
-    EXTI->RTSR |= EXTI_RTSR_TR2;
-    /* Unmask interrupts from EXTI2 line */
-    // Relevant register: EXTI->IMR
-    EXTI->IMR |= EXTI_IMR_MR2;
-    /* Assign EXTI2 interrupt priority = 0 in NVIC */
-    // Relevant register: NVIC->IP[2], or use NVIC_SetPriority
+    SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI2;   // Clear EXTI2 bits
+    SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI2_PB; // Map PB2 to EXTI2
+
+    /* Map EXTI3 line to PB3 */
+    SYSCFG->EXTICR[0] &= ~SYSCFG_EXTICR1_EXTI3;   // Clear EXTI3 bits
+    SYSCFG->EXTICR[0] |= SYSCFG_EXTICR1_EXTI3_PB; // Map PB3 to EXTI3
+
+    /* Configure rising-edge trigger for EXTI0, EXTI2, and EXTI3 */
+    EXTI->RTSR |= (EXTI_RTSR_TR0 | EXTI_RTSR_TR2 | EXTI_RTSR_TR3);
+
+    /* Unmask interrupts for EXTI0, EXTI2, and EXTI3 */
+    EXTI->IMR |= (EXTI_IMR_MR0 | EXTI_IMR_MR2 | EXTI_IMR_MR3);
+
+    /* Enable NVIC interrupts:
+       - EXTI0_1_IRQn handles EXTI0 and EXTI1
+       - EXTI2_3_IRQn handles EXTI2 and EXTI3
+    */
+    NVIC_SetPriority(EXTI0_1_IRQn, 0);
+    NVIC_EnableIRQ(EXTI0_1_IRQn);
+
     NVIC_SetPriority(EXTI2_3_IRQn, 0);
-    /* Enable EXTI2 interrupts in NVIC */
-    // Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
     NVIC_EnableIRQ(EXTI2_3_IRQn);
 }
 
 void EXTI2_3_IRQHandler()
 {
-    if ((EXTI->PR & EXTI_PR_PR2) != 0) // rising edge on PB2
+    if ((EXTI->PR & EXTI_PR_PR2) != 0 && fivefivefivefive == 0) // rising edge on PB2
     {
         if (timerTriggered == 0) // first edge detected
         {
@@ -42,35 +53,51 @@ void EXTI2_3_IRQHandler()
             // Convert to microseconds
             uint32_t period_us = (uint32_t)((cycles * 1000000ULL) / SystemCoreClock); // µs
             uint32_t freq_hz = (cycles ? (uint32_t)((SystemCoreClock + (cycles / 2)) / cycles) : 0);
-            // period into whole seconds
-            uint32_t period_s_whole = period_us / 1000000U; // integer seconds
-            uint32_t period_s_frac = period_us % 1000000U;  // leftover microseconds
-            trace_printf("--------------------------------------------------\n");
-            trace_printf("Total timer cycles: %u\n", (unsigned int)cycles);
-            // Show both seconds and microseconds
-            trace_printf("Period: %u.%06u s  (%u µs total)\n",
-                         period_s_whole, period_s_frac, period_us);
-            // Show frequency in Hertz
-            trace_printf("Frequency: %u Hz\n", freq_hz);
-            trace_printf("--------------------------------------------------\n");
+            frequency = freq_hz;
             timerTriggered = 0; // ready for next
         }
-        // 1. If this is the first edge:
-        //	- Clear count register (TIM2->CNT).
-        //	- Start timer (TIM2->CR1).
-        //    Else (this is the second edge):
-        //	- Stop timer (TIM2->CR1).
-        //	- Read out count register (TIM2->CNT).
-        //	- Calculate signal period and frequency.
-        //	- Print calculated values to the console.
-        //	  NOTE: Function trace_printf does not work
-        //	  with floating-point numbers: you must use
-        //	  "unsigned int" type to print your signal
-        //	  period and frequency.
-        //
-        // 2. Clear EXTI2 interrupt pending flag (EXTI->PR).
-        // NOTE: A pending register (PR) bit is cleared
-        // by writing 1 to it.
         EXTI->PR |= EXTI_PR_PR2; // clear EXTI2 pending flag
+    }
+
+    if ((EXTI->PR & EXTI_PR_PR3) != 0 && fivefivefivefive == 1) // rising edge on PB3
+    {
+        if (timerTriggered == 0) // first edge detected
+        {
+            TIM2->CNT = 0;            // reset counter
+            TIM2->CR1 |= TIM_CR1_CEN; // start timer
+            timerTriggered = 1;       // mark timer running
+        }
+        else // second edge detected
+        {
+            TIM2->CR1 &= ~(TIM_CR1_CEN); // stop timer
+            uint64_t cycles = TIM2->CNT;
+            uint32_t period_us = (uint32_t)((cycles * 1000000ULL) / SystemCoreClock); // µs
+            uint32_t freq_hz = (cycles ? (uint32_t)((SystemCoreClock + (cycles / 2)) / cycles) : 0);
+            frequency = freq_hz;
+            timerTriggered = 0; // ready for next
+        }
+        EXTI->PR |= EXTI_PR_PR3; // clear EXTI3 pending flag
+    }
+}
+
+void EXTI0_1_IRQHandler()
+{
+    if ((EXTI->PR & EXTI_PR_PR0) != 0) // rising edge on PA0
+    {
+        if (GPIOA->IDR & GPIO_IDR_0) // confirm PA0 is high
+        {
+            trace_printf("Switching Freq source \n");
+            if (fivefivefivefive == 0)
+            {
+                fivefivefivefive = 1;
+            }
+            else
+            {
+                fivefivefivefive = 0;
+            }
+            TIM2->CNT = 0;            // reset counter
+            TIM2->CR1 |= TIM_CR1_CEN; // start timer
+        }
+        EXTI->PR |= EXTI_PR_PR0; // clear EXTI0 pending flag
     }
 }
